@@ -36,7 +36,8 @@ Pillow>=10.0.0
 # ------------------------------------------------------------------------------
 spacy>=3.8.0,<3.9.0
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
-sentence-transformers>=2.2.0
+# Installed after torch/transformers pins below (semantic matching needs both).
+sentence-transformers>=2.2.0,<3.4.0
 scikit-learn>=1.3.0
 joblib>=1.3.0
 nltk>=3.8.1
@@ -80,10 +81,14 @@ datasets>=4.2.0
 # Integration - Stitch MCP & AI Assistant
 # ------------------------------------------------------------------------------
 httpx>=0.24.0
-transformers>=4.30.0
-torch==2.5.1+cpu; sys_platform == "linux"
-torch>=2.5.1; sys_platform != "linux"
-accelerate>=0.20.0 # for efficient model loading
+# PyTorch must install on the deploy runtime (Streamlit defaults to 3.12 via
+# .python-version). CPU wheels for Linux; >=2.6 supports Python 3.12–3.13.
+torch>=2.6.0,<3.0; sys_platform == "linux"
+torch>=2.6.0,<3.0; sys_platform != "linux"
+# transformers >=4.52 / 5.x raises NameError: name 'nn' is not defined on import
+# when torch is not yet in scope (HF issue #43784). Pin to last known-good release.
+transformers>=4.40.0,<4.52.0
+accelerate>=0.20.0,<1.7.0 # for efficient model loading
 
 # ------------------------------------------------------------------------------
 # Phase 2: Backend (FastAPI)
